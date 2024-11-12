@@ -22,8 +22,9 @@ const BusArrivals: React.FC = () => {
     const [lineId, setLineId] = useState("");
     const [stopName, setStopName] = useState("");
     const [naptanIds, setNaptanIds] = useState<DropDownData[]>([]);
-    const [checked, setChecked] = useState("");
     const [selectedNaptanId, setSelectedNaptanId] = useState("");
+    const [timeInterval, setTimeInterval] = useState("3");
+    const [timeStop, setTimeStop] = useState("30");
 
     useEffect(() => {
         const setup = async () => {
@@ -67,8 +68,8 @@ const BusArrivals: React.FC = () => {
             })
             .then(stopPointsResponse => {
                 const stopPoints: EntitiesStopPointInterface[] = stopPointsResponse.data.stopPoints;
-                const filteredStopPoints = stopPoints.filter(stopPoint => 
-                                                                stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
+                const filteredStopPoints = stopPoints.filter(stopPoint =>
+                    stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
 
                 const stopPointNaptanIds = extractNaptanIdsDirections(filteredStopPoints).map(nd => ({
                     label: nd.towards,
@@ -77,67 +78,70 @@ const BusArrivals: React.FC = () => {
 
                 setNaptanIds(stopPointNaptanIds);
             })
-            .catch (error => console.log(error));
+            .catch(error => console.log(error));
     }
 
-const handleSelect = async (stopId: string) => {
+    const handleSelect = async (stopId: string) => {
 
-    await AsyncStorage.setItem('stopId', stopId);
+        await AsyncStorage.setItem('stopId', stopId);
+        setSelectedNaptanId(stopId);
+        const fetchBusArrivalsForeground = async () => {
+            const busdata = await fetchBusArrivals();
+            console.log(`inside foreground ${busdata[0]}`);
+            setBusArrivals(busdata);
+        }
 
-    const fetchBusArrivalsForeground = async () => {
-        const busdata = await fetchBusArrivals();
-        console.log(`inside foreground ${busdata[0]}`);
-        setBusArrivals(busdata);
+        fetchBusArrivalsForeground();
+
+        setInterval(fetchBusArrivalsForeground, parseInt(timeInterval) * 60 * 1000);
     }
 
-    fetchBusArrivalsForeground();
+    return (
+        <View>
+            <TextInput label="Line Id" value={lineId} onChangeText={(value) => setLineId(value)} ></TextInput>
+            <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
+            <TouchableOpacity onPress={handlePress}>
+                <Text>Search</Text>
+            </TouchableOpacity>
 
-    const interval = setInterval(fetchBusArrivalsForeground, 3 * 60 * 1000);
-}
+            {
+                naptanIds.length > 0 ?
+                    (
+                        <>
+                            <Dropdown
+                                data={naptanIds}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Select an option"
+                                value={selectedNaptanId}
+                                onChange={item => handleSelect(item.value)}
+                            />
+                        </>
+                    )
+                    :
+                    <></>
+            }
+            <TextInput label="Time Interval (minutes)" 
+                        value={timeInterval.toString()} 
+                        keyboardType="numeric"
+                        onChangeText={(value) => setTimeInterval(value)} ></TextInput>
+            {
+                busArrivals.length > 0 ?
+                    (<>
+                        <Text>{busArrivals[0].lineId} towards {busArrivals[0].destinationName} at {busArrivals[0].stationName}</Text>
+                        {
+                            busArrivals.map((busArrival, index) => (
+                                <Text key={index}>
+                                    {busArrival.vehicleId} Arriving in {Math.round(busArrival.timeToStation / 60)} minutes
+                                </Text>
+                            ))
+                        }
+                    </>)
+                    : <></>
+            }
 
-return (
-    <View>
-        <TextInput label="Line Id" value={lineId} onChangeText={(value) => setLineId(value)} ></TextInput>
-        <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
-        <TouchableOpacity onPress={handlePress}>
-            <Text>Search</Text>
-        </TouchableOpacity>
-
-        {
-            naptanIds.length > 0 ?
-                (
-                    <>
-                        <Dropdown
-                            data={naptanIds}
-                            labelField="label"
-                            valueField="value"
-                            placeholder="Select an option"
-                            value={selectedNaptanId}
-                            onChange={item => handleSelect(item.value)}
-                        />
-                    </>
-                )
-                :
-                <></>
-        }
-
-        {
-            busArrivals.length > 0 ?
-                (<>
-                    <Text>{busArrivals[0].lineId} towards {busArrivals[0].destinationName} at {busArrivals[0].stationName}</Text>
-                    {
-                        busArrivals.map((busArrival, index) => (
-                            <Text key={index}>
-                                {busArrival.vehicleId} Arriving in {Math.round(busArrival.timeToStation / 60)} minutes
-                            </Text>
-                        ))
-                    }
-                </>)
-                : <></>
-        }
-
-    </View>
-);
+        </View>
+    );
 }
 
 export default BusArrivals

@@ -18,8 +18,8 @@ const registerBackgroundFetch = async () => {
         }
 
         await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-            minimumInterval: 3 * 60, // 3 minutes (note: actual interval may be longer due to OS restrictions)
-            stopOnTerminate: false,
+            minimumInterval: 3 * 60, 
+            stopOnTerminate: true,
             startOnBoot: true,
         });
 
