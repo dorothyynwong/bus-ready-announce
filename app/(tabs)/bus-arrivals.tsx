@@ -8,6 +8,7 @@ import { BACKGROUND_FETCH_TASK } from "@/tasks/backgroundFetchTask";
 import { TextInput, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dropdown } from "react-native-element-dropdown";
+import { extractNaptanIdsDirections } from "@/utils/extractNaptanIdsDirections";
 
 interface DropDownData {
     label: string;
@@ -66,16 +67,18 @@ const BusArrivals: React.FC = () => {
                         console.log(response.data);
                         const stopPoints: EntitiesStopPointInterface[] = response.data.stopPoints;
                         const filteredStopPoints = stopPoints.filter(stopPoint => stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()))
-                        console.log(filteredStopPoints)
+                        const naptanIdsDirections = extractNaptanIdsDirections(filteredStopPoints);
+
                         const stopPointNaptanIds: DropDownData[] = [];
-                        filteredStopPoints.map(stopPoint => {
+
+                        naptanIdsDirections.map(nd => {
                             const dropDownData = {
-                                label: stopPoint.naptanId,
-                                value: stopPoint.naptanId,
+                                label: nd.towards,
+                                value: nd.naptanId
                             }
                             stopPointNaptanIds.push(dropDownData);
+                        })
 
-                        });
                         setNaptanIds(stopPointNaptanIds);
                     })
                     .catch(error => console.log(error));
