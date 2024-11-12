@@ -65,8 +65,10 @@ const BusArrivals: React.FC = () => {
                     .then(response => {
                         console.log(response.data);
                         const stopPoints: EntitiesStopPointInterface[] = response.data.stopPoints;
+                        const filteredStopPoints = stopPoints.filter(stopPoint => stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()))
+                        console.log(filteredStopPoints)
                         const stopPointNaptanIds: DropDownData[] = [];
-                        stopPoints.map(stopPoint => {
+                        filteredStopPoints.map(stopPoint => {
                             const dropDownData = {
                                 label: stopPoint.naptanId,
                                 value: stopPoint.naptanId,
