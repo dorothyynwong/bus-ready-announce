@@ -69,7 +69,6 @@ const BusArrivals: React.FC = () => {
                 const stopPoints: EntitiesStopPointInterface[] = stopPointsResponse.data.stopPoints;
                 const filteredStopPoints = stopPoints.filter(stopPoint => 
                                                                 stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
-                const naptanIdsDirections = extractNaptanIdsDirections(filteredStopPoints);
 
                 const stopPointNaptanIds = extractNaptanIdsDirections(filteredStopPoints).map(nd => ({
                     label: nd.towards,
