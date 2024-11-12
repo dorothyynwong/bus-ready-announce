@@ -26,27 +26,27 @@ const BusArrivals: React.FC = () => {
     const [timeInterval, setTimeInterval] = useState("3");
     const [timeStop, setTimeStop] = useState("30");
 
-    useEffect(() => {
-        const setup = async () => {
-            await registerBackgroundFetch();
-        };
-        setup();
+    // useEffect(() => {
+    //     const setup = async () => {
+    //         await registerBackgroundFetch();
+    //     };
+    //     setup();
 
-        const fetchBusArrivalsForeground = async () => {
-            const busdata = await fetchBusArrivals();
-            console.log(`inside foreground ${busdata[0]}`);
-            setBusArrivals(busdata);
-        }
+    //     const fetchBusArrivalsForeground = async () => {
+    //         const busdata = await fetchBusArrivals();
+    //         console.log(`inside foreground ${busdata[0]}`);
+    //         setBusArrivals(busdata);
+    //     }
 
-        fetchBusArrivalsForeground();
+    //     fetchBusArrivalsForeground();
 
-        const interval = setInterval(fetchBusArrivalsForeground, 3 * 60 * 1000);
+    //     const interval = setInterval(fetchBusArrivalsForeground, 3 * 60 * 1000);
 
-        return () => {
-            clearInterval(interval);
-            BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-        };
-    }, []);
+    //     return () => {
+    //         clearInterval(interval);
+    //         BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+    //     };
+    // }, []);
 
     if (status === "loading") return (
         <View>
@@ -93,13 +93,17 @@ const BusArrivals: React.FC = () => {
 
         fetchBusArrivalsForeground();
 
-        setInterval(fetchBusArrivalsForeground, parseInt(timeInterval) * 60 * 1000);
+        setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
     }
 
     return (
         <View>
             <TextInput label="Line Id" value={lineId} onChangeText={(value) => setLineId(value)} ></TextInput>
             <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
+            <TextInput label="Time Interval (minutes)" 
+                        value={timeInterval.toString()} 
+                        keyboardType="numeric"
+                        onChangeText={(value) => setTimeInterval(value)} ></TextInput>
             <TouchableOpacity onPress={handlePress}>
                 <Text>Search</Text>
             </TouchableOpacity>
@@ -121,10 +125,7 @@ const BusArrivals: React.FC = () => {
                     :
                     <></>
             }
-            <TextInput label="Time Interval (minutes)" 
-                        value={timeInterval.toString()} 
-                        keyboardType="numeric"
-                        onChangeText={(value) => setTimeInterval(value)} ></TextInput>
+
             {
                 busArrivals.length > 0 ?
                     (<>
