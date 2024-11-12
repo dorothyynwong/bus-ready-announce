@@ -5,8 +5,6 @@ import { ArrivalPredictionsByLinesAndStopPointInterface } from "@/api/apiInterfa
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GenerateNotificationFromBusArrivalData } from "@/utils/generateNotificationMessages";
 
-
-
 export async function fetchArrivalPredictionsByLines(ids: string) {
     try {
         const response: AxiosResponse = await client.get(`https://api.tfl.gov.uk/Line/${ids}/Arrivals`);
@@ -16,34 +14,28 @@ export async function fetchArrivalPredictionsByLines(ids: string) {
     }
 }
 
-//https://api.tfl.gov.uk/Line/194/Arrivals/490005796S
 export async function fetchArrivalPredictionsByLinesAndStopPoint(ids: string, stopPointId: string) {
     try {
         const response: AxiosResponse = await client.get(`https://api.tfl.gov.uk/Line/${ids}/Arrivals/${stopPointId}`);
-        console.log(`inside api.ts ${response.data}` );
+        console.log(`inside api.ts` );
         return response;
     } catch (error) {
         throw error;
     }
 }
 
-export async function fetchStopPointsByCoordinates(lat: number, lon:number, stopTypes:string, radius:number, returnLines: boolean) {
-    //NaptanPublicBusCoachTram
-    //51.399271, -0.033838
-    //1000
-    //https://api.tfl.gov.uk/StopPoint/?lat=51.399271&lon=-0.033838&radius=1000&stopTypes=NaptanPublicBusCoachTram&returnLines=true
-    // 490005796S
+export async function fetchStopPointsByCoordinates(lat: number, lon:number) {
     try {
-        const response: AxiosResponse = await client.get(`https://api.tfl.gov.uk/StopPoint/?lat=${lat}&lon=${lon}&radius=${radius}&stopTypes=${stopTypes}&returnLines=${returnLines}`);
+        const response: AxiosResponse = await client.get(`https://api.tfl.gov.uk/StopPoint/?lat=${lat}&lon=${lon}&stopTypes=NaptanPublicBusCoachTram`);
         return response;
     } catch (error) {
         throw error;
     }
 }
 
-export async function fetchStopPointsByCommonName(query: string) {
+export async function fetchStopPointsByCommonNameLineId(query: string, ids: string) {
     try {
-        const response: AxiosResponse = await client.get(`https://api.tfl.gov.uk/StopPoint/Search?query=${query}`);
+        const response: AxiosResponse = await client.get(`https://api.tfl.gov.uk/StopPoint/Search/${query}?lines=${ids}&modes=bus`);
         return response;
     } catch (error) {
         throw error;
@@ -68,18 +60,15 @@ export async function sendPushNotification(message: NotificationMessageInterface
 export const fetchBusArrivals = async (): Promise<ArrivalPredictionsByLinesAndStopPointInterface[]> => {
     const expoPushToken = await AsyncStorage.getItem('expoPushToken');
     const lineId = await AsyncStorage.getItem('lineId');
-    const stationId = await AsyncStorage.getItem('stationId');
-
-    // const lineId = "194";
-    // const stationId = "490005796S";
+    const stopId = await AsyncStorage.getItem('stopId');
 
     console.log(`expoPushToken ${expoPushToken}`);
     console.log(`lineId ${lineId}`);
-    console.log(`stationId ${stationId}`);
+    console.log(`stopId ${stopId}`);
 
-    if ( !lineId || !stationId ) return [];
+    if ( !lineId || !stopId ) return [];
 
-    const response = await fetchArrivalPredictionsByLinesAndStopPoint(lineId, stationId);
+    const response = await fetchArrivalPredictionsByLinesAndStopPoint(lineId, stopId);
     const busArrivalsSort: ArrivalPredictionsByLinesAndStopPointInterface[] = response.data;
     console.log(`inside fetchBusArrivals: ${busArrivalsSort[0].vehicleId}`);
     busArrivalsSort.sort((a, b) => a.timeToStation - b.timeToStation);

@@ -6,7 +6,7 @@ export interface StopPointsSearchMatchInterface {
     lon: number;
 }
 
-export interface StopPointsByCommonNameInterface {
+export interface StopPointsByCommonNameLineIdInterface {
     query: string;
     from: number;
     page: number;

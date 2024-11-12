@@ -1,19 +1,28 @@
-import { fetchBusArrivals } from "@/api/api";
-import { ArrivalPredictionsByLinesAndStopPointInterface } from "@/api/apiInterface";
+import { fetchBusArrivals, fetchStopPointsByCommonNameLineId, fetchStopPointsByCoordinates } from "@/api/api";
+import { ArrivalPredictionsByLinesAndStopPointInterface, EntitiesStopPointInterface } from "@/api/apiInterface";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, AppState, Platform,  TouchableOpacity,  View } from "react-native";
+import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import * as BackgroundFetch from 'expo-background-fetch';
 import registerBackgroundFetch from "@/tasks/registerBackgroundFetch";
 import { BACKGROUND_FETCH_TASK } from "@/tasks/backgroundFetchTask";
-import { TextInput, Text, Button } from "react-native-paper";
+import { TextInput, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Dropdown } from "react-native-element-dropdown";
+
+interface DropDownData {
+    label: string;
+    value: string;
+}
 
 const BusArrivals: React.FC = () => {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const [errorMessages, setErrorMessages] = useState<string[]>([]);
     const [busArrivals, setBusArrivals] = useState<ArrivalPredictionsByLinesAndStopPointInterface[]>([]);
     const [lineId, setLineId] = useState("");
-    const [stationId, setStationId] = useState("")
+    const [stopName, setStopName] = useState("");
+    const [naptanIds, setNaptanIds] = useState<DropDownData[]>([]);
+    const [checked, setChecked] = useState("");
+    const [selectedNaptanId, setSelectedNaptanId] = useState("");
 
     useEffect(() => {
         const setup = async () => {
@@ -44,9 +53,37 @@ const BusArrivals: React.FC = () => {
         </View>
     );
 
-    const handlePress = async() => {
+
+    const handlePress = async () => {
         await AsyncStorage.setItem('lineId', lineId);
-        await AsyncStorage.setItem('stationId', stationId);
+        fetchStopPointsByCommonNameLineId(stopName, lineId)
+            .then(async response => {
+                const stopPoint = response.data;
+                const lat = stopPoint.matches[0].lat;
+                const lon = stopPoint.matches[0].lon;
+                fetchStopPointsByCoordinates(lat, lon)
+                    .then(response => {
+                        console.log(response.data);
+                        const stopPoints: EntitiesStopPointInterface[] = response.data.stopPoints;
+                        const stopPointNaptanIds: DropDownData[] = [];
+                        stopPoints.map(stopPoint => {
+                            const dropDownData = {
+                                label: stopPoint.naptanId,
+                                value: stopPoint.naptanId,
+                            }
+                            stopPointNaptanIds.push(dropDownData);
+
+                        });
+                        setNaptanIds(stopPointNaptanIds);
+                    })
+                    .catch(error => console.log(error));
+            })
+            .catch(error => console.log(error));
+    }
+
+    const handleSelect = async (stopId: string) => {
+
+        await AsyncStorage.setItem('stopId', stopId);
 
         const fetchBusArrivalsForeground = async () => {
             const busdata = await fetchBusArrivals();
@@ -62,10 +99,28 @@ const BusArrivals: React.FC = () => {
     return (
         <View>
             <TextInput label="Line Id" value={lineId} onChangeText={(value) => setLineId(value)} ></TextInput>
-            <TextInput label="Station Id" value={stationId} onChangeText={(value) => setStationId(value)} ></TextInput>
+            <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
             <TouchableOpacity onPress={handlePress}>
                 <Text>Search</Text>
             </TouchableOpacity>
+
+            {
+                naptanIds.length > 0 ?
+                    (
+                        <>
+                            <Dropdown
+                                data={naptanIds}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Select an option"
+                                value={selectedNaptanId}
+                                onChange={item => handleSelect(item.value)}
+                            />
+                        </>
+                    )
+                    :
+                    <></>
+            }
 
             {
                 busArrivals.length > 0 ?
