@@ -1,10 +1,11 @@
-import { fetchStopPointsByCommonNameLineId, fetchStopPointsByCoordinates } from "@/api/api";
+import { fetchBusArrivals, fetchStopPointsByCommonNameLineId, fetchStopPointsByCoordinates } from "@/api/api";
 import { EntitiesStopPointInterface, StopPointsSearchMatchInterface } from "@/api/apiInterface";
 import { extractNaptanIdsDirections } from "@/utils/extractNaptanIdsDirections";
 import { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
 import { Card, Text } from "react-native-paper";
 import { StyleSheet } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface StopPointsListProps {
     lineId: string;
@@ -16,7 +17,7 @@ interface DropDownDataInterface {
     value: string;
 }
 
-const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName}) => {
+const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName }) => {
     const [dropDownData, setDropDownData] = useState<DropDownDataInterface[]>([]);
 
     useEffect(() => {
@@ -43,12 +44,25 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName}) => {
             .catch(error => console.log(error));
     }, [lineId, stopName]);
 
+    // const onCardPress = async (data: DropDownDataInterface) => {
+    //     await AsyncStorage.setItem('lineId', lineId);
+    //     await AsyncStorage.setItem('stopId', data.value);
+    //     const fetchBusArrivalsForeground = async () => {
+    //         const busdata = await fetchBusArrivals();
+    //         console.log(`inside foreground ${busdata[0]}`);
+    //         setBusArrivals(busdata);
+    //     }
+
+    //     fetchBusArrivalsForeground();
+
+    //     setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
+    // }
     return (
         <View>
             <FlatList
-                data={dropDownData} 
+                data={dropDownData}
                 renderItem={({ item }) => (
-                    <Card style={styles.card}>
+                    <Card style={styles.card} onPress={() => onCardPress(item)}>
                         <Card.Content>
                             <Text style={styles.itemText}>{item.label}</Text>
                         </Card.Content>
