@@ -63,7 +63,8 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, selec
     }, [lineId, stopName]);
 
     return (
-        <View style={styles.container}>
+        // <View style={styles.container}>
+        <View>
             <FlatList
                 data={dropDownData} // Flat list data
                 renderItem={({ item }) => (
@@ -73,18 +74,20 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, selec
                         </Card.Content>
                     </Card>
                 )}
-                keyExtractor={(item) => item.value}
+                keyExtractor={(item, index) => `${item.value}-${index}`}
                 initialNumToRender={20} 
             />
-        </View>)
+        </View>
+        // <>{dropDownData.map(data => <Text>{data.label}</Text>)}</>
+        )
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        marginTop: 50,
-        padding: 10,
-    },
+    // container: {
+    //     flex: 1,
+    //     marginTop: 50,
+    //     padding: 10,
+    // },
     card: {
         marginBottom: 10,
     },
