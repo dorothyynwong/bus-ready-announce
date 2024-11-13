@@ -44,6 +44,7 @@ export async function fetchStopPointsByCommonNameLineId(query: string, ids: stri
 
 export async function fetchStopPointsByLineId(id: string){
     try {
+        console.log(`fetchStopPointsById ${id}`);
         const response: AxiosResponse = await client.get(`https://api.tfl.gov.uk/Line/${id}/StopPoints`);
         return response;
     } catch (error) {

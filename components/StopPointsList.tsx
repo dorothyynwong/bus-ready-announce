@@ -2,7 +2,10 @@ import { fetchStopPointsByLineId } from "@/api/api";
 import { EntitiesStopPointInterface } from "@/api/apiInterface";
 import { extractNaptanIdsDirections } from "@/utils/extractNaptanIdsDirections";
 import { useEffect, useState } from "react";
+import { FlatList, ScrollView, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
+import { Card, List, Text } from "react-native-paper";
+import { StyleSheet } from 'react-native';
 
 interface StopPointsListProps {
     lineId: string;
@@ -32,16 +35,35 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, selectedNaptanI
             .catch(error => console.log(error));
     }, [lineId]);
 
-    return (<>
-        <Dropdown
-            data={dropDownData}
-            labelField="label"
-            valueField="value"
-            placeholder="Select a bus stop"
-            value={selectedNaptanId}
-            onChange={item => setSelectedNaptanId(item.value)}
-        />
-    </>)
+    return (
+        <View style={styles.container}>
+            <FlatList
+                data={dropDownData} // Flat list data
+                renderItem={({ item }) => (
+                    <Card style={styles.card}>
+                        <Card.Content>
+                            <Text style={styles.itemText}>{item.label}</Text>
+                        </Card.Content>
+                    </Card>
+                )}
+                keyExtractor={(item) => item.value}
+                initialNumToRender={20} 
+            />
+        </View>)
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        marginTop: 50,
+        padding: 10,
+    },
+    card: {
+        marginBottom: 10,
+    },
+    itemText: {
+        fontSize: 18,
+    },
+});
 
 export default StopPointsList;
