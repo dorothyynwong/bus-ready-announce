@@ -111,27 +111,7 @@ const BusArrivals: React.FC = () => {
 
             {debouncedLineId!="" && debouncedStopName!="" &&
             <StopPointsList lineId={debouncedLineId} 
-                            stopName={debouncedStopName} 
-                            selectedNaptanId={selectedNaptanId} 
-                            setSelectedNaptanId={setSelectedNaptanId}/>}
-
-            {/* {
-                naptanIds.length > 0 ?
-                    (
-                        <>
-                            <Dropdown
-                                data={naptanIds}
-                                labelField="label"
-                                valueField="value"
-                                placeholder="Select an option"
-                                value={selectedNaptanId}
-                                onChange={item => handleSelect(item.value)}
-                            />
-                        </>
-                    )
-                    :
-                    <></>
-            } */}
+                            stopName={debouncedStopName}/>}
 
             {
                 busArrivals.length > 0 ?
