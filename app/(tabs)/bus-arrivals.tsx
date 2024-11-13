@@ -1,6 +1,6 @@
 import { fetchBusArrivals, fetchStopPointsByCommonNameLineId, fetchStopPointsByCoordinates } from "@/api/api";
 import { ArrivalPredictionsByLinesAndStopPointInterface, EntitiesStopPointInterface } from "@/api/apiInterface";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, TouchableOpacity, View } from "react-native";
 import * as BackgroundFetch from 'expo-background-fetch';
 import registerBackgroundFetch from "@/tasks/registerBackgroundFetch";
@@ -9,6 +9,8 @@ import { TextInput, Text } from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Dropdown } from "react-native-element-dropdown";
 import { extractNaptanIdsDirections } from "@/utils/extractNaptanIdsDirections";
+import useDebounce from "@/hooks/useDebounce";
+import StopPointsList from "@/components/StopPointsList";
 
 interface DropDownData {
     label: string;
@@ -25,6 +27,7 @@ const BusArrivals: React.FC = () => {
     const [selectedNaptanId, setSelectedNaptanId] = useState("");
     const [timeInterval, setTimeInterval] = useState("3");
     const [timeStop, setTimeStop] = useState("30");
+    const debouncedLineId = useDebounce(lineId, 10000);
 
     // useEffect(() => {
     //     const setup = async () => {
@@ -81,34 +84,35 @@ const BusArrivals: React.FC = () => {
             .catch(error => console.log(error));
     }
 
-    const handleSelect = async (stopId: string) => {
+    // const handleSelect = async (stopId: string) => {
 
-        await AsyncStorage.setItem('stopId', stopId);
-        setSelectedNaptanId(stopId);
-        const fetchBusArrivalsForeground = async () => {
-            const busdata = await fetchBusArrivals();
-            console.log(`inside foreground ${busdata[0]}`);
-            setBusArrivals(busdata);
-        }
+    //     await AsyncStorage.setItem('stopId', stopId);
+    //     setSelectedNaptanId(stopId);
+    //     const fetchBusArrivalsForeground = async () => {
+    //         const busdata = await fetchBusArrivals();
+    //         console.log(`inside foreground ${busdata[0]}`);
+    //         setBusArrivals(busdata);
+    //     }
 
-        fetchBusArrivalsForeground();
+    //     fetchBusArrivalsForeground();
 
-        setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
-    }
+    //     setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
+    // }
 
     return (
         <View>
             <TextInput label="Line Id" value={lineId} onChangeText={(value) => setLineId(value)} ></TextInput>
-            <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
+            <StopPointsList lineId={debouncedLineId} selectedNaptanId={selectedNaptanId} setSelectedNaptanId={setSelectedNaptanId}/>
+            {/* <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
             <TextInput label="Time Interval (minutes)" 
                         value={timeInterval.toString()} 
                         keyboardType="numeric"
                         onChangeText={(value) => setTimeInterval(value)} ></TextInput>
             <TouchableOpacity onPress={handlePress}>
                 <Text>Search</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
-            {
+            {/* {
                 naptanIds.length > 0 ?
                     (
                         <>
@@ -124,7 +128,7 @@ const BusArrivals: React.FC = () => {
                     )
                     :
                     <></>
-            }
+            } */}
 
             {
                 busArrivals.length > 0 ?
