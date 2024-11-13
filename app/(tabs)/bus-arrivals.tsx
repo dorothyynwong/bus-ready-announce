@@ -28,6 +28,7 @@ const BusArrivals: React.FC = () => {
     const [timeInterval, setTimeInterval] = useState("3");
     const [timeStop, setTimeStop] = useState("30");
     const debouncedLineId = useDebounce(lineId, 10000);
+    const debouncedStopName = useDebounce(stopName, 1000);
 
     // useEffect(() => {
     //     const setup = async () => {
@@ -59,30 +60,30 @@ const BusArrivals: React.FC = () => {
     );
 
 
-    const handlePress = async () => {
-        await AsyncStorage.setItem('lineId', lineId);
-        fetchStopPointsByCommonNameLineId(stopName, lineId)
-            .then(response => {
-                const stopPoint = response.data;
-                const lat = stopPoint.matches[0].lat;
-                const lon = stopPoint.matches[0].lon;
+    // const handlePress = async () => {
+    //     await AsyncStorage.setItem('lineId', lineId);
+    //     fetchStopPointsByCommonNameLineId(stopName, lineId)
+    //         .then(response => {
+    //             const stopPoint = response.data;
+    //             const lat = stopPoint.matches[0].lat;
+    //             const lon = stopPoint.matches[0].lon;
 
-                return fetchStopPointsByCoordinates(lat, lon);
-            })
-            .then(stopPointsResponse => {
-                const stopPoints: EntitiesStopPointInterface[] = stopPointsResponse.data.stopPoints;
-                const filteredStopPoints = stopPoints.filter(stopPoint =>
-                    stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
+    //             return fetchStopPointsByCoordinates(lat, lon);
+    //         })
+    //         .then(stopPointsResponse => {
+    //             const stopPoints: EntitiesStopPointInterface[] = stopPointsResponse.data.stopPoints;
+    //             const filteredStopPoints = stopPoints.filter(stopPoint =>
+    //                 stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
 
-                const stopPointNaptanIds = extractNaptanIdsDirections(filteredStopPoints).map(nd => ({
-                    label: nd.towards,
-                    value: nd.naptanId,
-                }));
+    //             const stopPointNaptanIds = extractNaptanIdsDirections(filteredStopPoints).map(nd => ({
+    //                 label: nd.towards,
+    //                 value: nd.naptanId,
+    //             }));
 
-                setNaptanIds(stopPointNaptanIds);
-            })
-            .catch(error => console.log(error));
-    }
+    //             setNaptanIds(stopPointNaptanIds);
+    //         })
+    //         .catch(error => console.log(error));
+    // }
 
     // const handleSelect = async (stopId: string) => {
 
@@ -102,15 +103,17 @@ const BusArrivals: React.FC = () => {
     return (
         <View>
             <TextInput label="Line Id" value={lineId} onChangeText={(value) => setLineId(value)} ></TextInput>
-            <StopPointsList lineId={debouncedLineId} selectedNaptanId={selectedNaptanId} setSelectedNaptanId={setSelectedNaptanId}/>
-            {/* <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
+            <TextInput label="Stop Name" value={stopName} onChangeText={(value) => setStopName(value)} ></TextInput>
             <TextInput label="Time Interval (minutes)" 
                         value={timeInterval.toString()} 
                         keyboardType="numeric"
                         onChangeText={(value) => setTimeInterval(value)} ></TextInput>
-            <TouchableOpacity onPress={handlePress}>
-                <Text>Search</Text>
-            </TouchableOpacity> */}
+
+            {debouncedLineId!="" && debouncedStopName!="" &&
+            <StopPointsList lineId={debouncedLineId} 
+                            stopName={debouncedStopName} 
+                            selectedNaptanId={selectedNaptanId} 
+                            setSelectedNaptanId={setSelectedNaptanId}/>}
 
             {/* {
                 naptanIds.length > 0 ?

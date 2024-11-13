@@ -1,5 +1,5 @@
-import { fetchStopPointsByLineId } from "@/api/api";
-import { EntitiesStopPointInterface } from "@/api/apiInterface";
+import { fetchStopPointsByCommonNameLineId, fetchStopPointsByCoordinates, fetchStopPointsByLineId } from "@/api/api";
+import { EntitiesStopPointInterface, StopPointsSearchMatchInterface } from "@/api/apiInterface";
 import { extractNaptanIdsDirections } from "@/utils/extractNaptanIdsDirections";
 import { useEffect, useState } from "react";
 import { FlatList, ScrollView, View } from "react-native";
@@ -9,6 +9,7 @@ import { StyleSheet } from 'react-native';
 
 interface StopPointsListProps {
     lineId: string;
+    stopName: string;
     selectedNaptanId: string;
     setSelectedNaptanId: (newId: string) => void;
 }
@@ -18,22 +19,48 @@ interface DropDownDataInterface {
     value: string;
 }
 
-const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, selectedNaptanId, setSelectedNaptanId }) => {
+const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, selectedNaptanId, setSelectedNaptanId }) => {
     const [dropDownData, setDropDownData] = useState<DropDownDataInterface[]>([]);
 
     useEffect(() => {
-        fetchStopPointsByLineId(lineId)
+        fetchStopPointsByCommonNameLineId(stopName, lineId)
             .then(response => {
-                const stopPoints = response.data;
-                const stopPointNaptanIds = extractNaptanIdsDirections(stopPoints).map(nd => ({
-                    label: `${nd.commonName} towards ${nd.towards}`,
-                    value: nd.naptanId,
-                }));
-                setDropDownData(stopPointNaptanIds);
+                const stopPoint = response.data;
+                const matches:StopPointsSearchMatchInterface[] = stopPoint.matches;
+                matches.map(match => {
+                    const lat = match.lat;
+                    const lon = match.lon;
+                    fetchStopPointsByCoordinates(lat, lon)
+                    .then(stopPointsResponse => {
+                        const stopPoints: EntitiesStopPointInterface[] = stopPointsResponse.data.stopPoints;
+                        const filteredStopPoints = stopPoints.filter(stopPoint =>
+                            stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
+                        const stopPointNaptanIds = extractNaptanIdsDirections(filteredStopPoints).map(nd => ({
+                            label: `${nd.commonName} towards ${nd.towards}`,
+                            value: nd.naptanId,
+                        }));
+                        setDropDownData(prevData => [...prevData, ...stopPointNaptanIds]);
+                })
+                })
+                // const lat = stopPoint.matches[0].lat;
+                // const lon = stopPoint.matches[0].lon;
 
+
+                // return fetchStopPointsByCoordinates(lat, lon);
             })
+            // .then(stopPointsResponse => {
+            //     const stopPoints: EntitiesStopPointInterface[] = stopPointsResponse.data.stopPoints;
+            //     const filteredStopPoints = stopPoints.filter(stopPoint =>
+            //         stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
+            //     const stopPointNaptanIds = extractNaptanIdsDirections(filteredStopPoints).map(nd => ({
+            //         label: `${nd.commonName} towards ${nd.towards}`,
+            //         value: nd.naptanId,
+            //     }));
+            //     setDropDownData(stopPointNaptanIds);
+
+            // })
             .catch(error => console.log(error));
-    }, [lineId]);
+    }, [lineId, stopName]);
 
     return (
         <View style={styles.container}>
