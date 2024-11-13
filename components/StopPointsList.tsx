@@ -9,8 +9,6 @@ import { StyleSheet } from 'react-native';
 interface StopPointsListProps {
     lineId: string;
     stopName: string;
-    selectedNaptanId: string;
-    setSelectedNaptanId: (newId: string) => void;
 }
 
 interface DropDownDataInterface {
@@ -18,7 +16,7 @@ interface DropDownDataInterface {
     value: string;
 }
 
-const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, selectedNaptanId, setSelectedNaptanId }) => {
+const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName}) => {
     const [dropDownData, setDropDownData] = useState<DropDownDataInterface[]>([]);
 
     useEffect(() => {
