@@ -49,6 +49,7 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
     const onCardPress = async (data: BusStopDataInterface) => {
         await AsyncStorage.setItem('lineId', lineId);
         await AsyncStorage.setItem('stopId', data.value);
+        await AsyncStorage.setItem('timeInterval', timeInterval);
         const fetchBusArrivalsForeground = async () => {
             const busdata = await fetchBusArrivals();
             console.log(`inside foreground`);

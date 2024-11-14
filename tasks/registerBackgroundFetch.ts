@@ -1,6 +1,7 @@
 import {  Platform  } from "react-native";
 import * as Notifications from 'expo-notifications';
 import * as BackgroundFetch from 'expo-background-fetch';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BACKGROUND_FETCH_TASK = 'background-fetch-bus-arrivals';
 
@@ -17,8 +18,10 @@ const registerBackgroundFetch = async () => {
             throw new Error('Permission not granted for notifications');
         }
 
+        const timeInterval = await AsyncStorage.getItem('timeInterval');
+
         await BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-            minimumInterval: 3 * 60, 
+            minimumInterval: timeInterval && parseInt(timeInterval) > 0 ? parseInt(timeInterval) * 60 : 3 * 60, 
             stopOnTerminate: true,
             startOnBoot: true,
         });
