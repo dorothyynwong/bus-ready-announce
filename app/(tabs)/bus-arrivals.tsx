@@ -6,16 +6,8 @@ import * as BackgroundFetch from 'expo-background-fetch';
 import registerBackgroundFetch from "@/tasks/registerBackgroundFetch";
 import { BACKGROUND_FETCH_TASK } from "@/tasks/backgroundFetchTask";
 import { TextInput, Text } from "react-native-paper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Dropdown } from "react-native-element-dropdown";
-import { extractNaptanIdsDirections } from "@/utils/extractNaptanIdsDirections";
 import useDebounce from "@/hooks/useDebounce";
 import StopPointsList from "@/components/StopPointsList";
-
-interface DropDownData {
-    label: string;
-    value: string;
-}
 
 const BusArrivals: React.FC = () => {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -23,8 +15,6 @@ const BusArrivals: React.FC = () => {
     const [busArrivals, setBusArrivals] = useState<ArrivalPredictionsByLinesAndStopPointInterface[]>([]);
     const [lineId, setLineId] = useState("");
     const [stopName, setStopName] = useState("");
-    const [naptanIds, setNaptanIds] = useState<DropDownData[]>([]);
-    const [selectedNaptanId, setSelectedNaptanId] = useState("");
     const [timeInterval, setTimeInterval] = useState("3");
     const [timeStop, setTimeStop] = useState("30");
     const debouncedLineId = useDebounce(lineId, 10000);

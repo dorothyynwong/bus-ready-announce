@@ -14,13 +14,13 @@ interface StopPointsListProps {
     timeInterval: string;
 }
 
-interface DropDownDataInterface {
+interface BusStopDataInterface {
     label: string;
     value: string;
 }
 
 const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBusArrivals, timeInterval }) => {
-    const [dropDownData, setDropDownData] = useState<DropDownDataInterface[]>([]);
+    const [busStopData, setBusStopData] = useState<BusStopDataInterface[]>([]);
 
     useEffect(() => {
         fetchStopPointsByCommonNameLineId(stopName, lineId)
@@ -39,14 +39,14 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
                                 label: `${nd.commonName} towards ${nd.towards}`,
                                 value: nd.naptanId,
                             }));
-                            setDropDownData(prevData => [...prevData, ...stopPointNaptanIds]);
+                            setBusStopData(prevData => [...prevData, ...stopPointNaptanIds]);
                         })
                 })
             })
             .catch(error => console.log(error));
     }, [lineId, stopName]);
 
-    const onCardPress = async (data: DropDownDataInterface) => {
+    const onCardPress = async (data: BusStopDataInterface) => {
         await AsyncStorage.setItem('lineId', lineId);
         await AsyncStorage.setItem('stopId', data.value);
         const fetchBusArrivalsForeground = async () => {
@@ -62,7 +62,7 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
     return (
         <View>
             <FlatList
-                data={dropDownData}
+                data={busStopData}
                 renderItem={({ item }) => (
                     <Card style={styles.card} onPress={() => onCardPress(item)}>
                         <Card.Content>
