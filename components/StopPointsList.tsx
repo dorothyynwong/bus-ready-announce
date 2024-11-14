@@ -1,5 +1,5 @@
 import { fetchBusArrivals, fetchStopPointsByCommonNameLineId, fetchStopPointsByCoordinates } from "@/api/api";
-import { EntitiesStopPointInterface, StopPointsSearchMatchInterface } from "@/api/apiInterface";
+import { ArrivalPredictionsByLinesAndStopPointInterface, EntitiesStopPointInterface, StopPointsSearchMatchInterface } from "@/api/apiInterface";
 import { extractNaptanIdsDirections } from "@/utils/extractNaptanIdsDirections";
 import { useEffect, useState } from "react";
 import { FlatList, View } from "react-native";
@@ -10,6 +10,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 interface StopPointsListProps {
     lineId: string;
     stopName: string;
+    setBusArrivals: (busArrivals: ArrivalPredictionsByLinesAndStopPointInterface[]) => void;
+    timeInterval: string;
 }
 
 interface DropDownDataInterface {
@@ -17,7 +19,7 @@ interface DropDownDataInterface {
     value: string;
 }
 
-const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName }) => {
+const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBusArrivals, timeInterval }) => {
     const [dropDownData, setDropDownData] = useState<DropDownDataInterface[]>([]);
 
     useEffect(() => {
@@ -44,19 +46,19 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName }) => 
             .catch(error => console.log(error));
     }, [lineId, stopName]);
 
-    // const onCardPress = async (data: DropDownDataInterface) => {
-    //     await AsyncStorage.setItem('lineId', lineId);
-    //     await AsyncStorage.setItem('stopId', data.value);
-    //     const fetchBusArrivalsForeground = async () => {
-    //         const busdata = await fetchBusArrivals();
-    //         console.log(`inside foreground ${busdata[0]}`);
-    //         setBusArrivals(busdata);
-    //     }
+    const onCardPress = async (data: DropDownDataInterface) => {
+        await AsyncStorage.setItem('lineId', lineId);
+        await AsyncStorage.setItem('stopId', data.value);
+        const fetchBusArrivalsForeground = async () => {
+            const busdata = await fetchBusArrivals();
+            console.log(`inside foreground`);
+            setBusArrivals(busdata);
+        }
 
-    //     fetchBusArrivalsForeground();
+        fetchBusArrivalsForeground();
 
-    //     setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
-    // }
+        setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
+    }
     return (
         <View>
             <FlatList

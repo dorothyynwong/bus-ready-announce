@@ -30,27 +30,16 @@ const BusArrivals: React.FC = () => {
     const debouncedLineId = useDebounce(lineId, 10000);
     const debouncedStopName = useDebounce(stopName, 1000);
 
-    // useEffect(() => {
-    //     const setup = async () => {
-    //         await registerBackgroundFetch();
-    //     };
-    //     setup();
+    useEffect(() => {
+        const setup = async () => {
+            await registerBackgroundFetch();
+        };
+        setup();
 
-    //     const fetchBusArrivalsForeground = async () => {
-    //         const busdata = await fetchBusArrivals();
-    //         console.log(`inside foreground ${busdata[0]}`);
-    //         setBusArrivals(busdata);
-    //     }
-
-    //     fetchBusArrivalsForeground();
-
-    //     const interval = setInterval(fetchBusArrivalsForeground, 3 * 60 * 1000);
-
-    //     return () => {
-    //         clearInterval(interval);
-    //         BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-    //     };
-    // }, []);
+        return () => {
+            BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+        };
+    }, [busArrivals]);
 
     if (status === "loading") return (
         <View>
@@ -58,47 +47,6 @@ const BusArrivals: React.FC = () => {
             <Text>Loading bus arrivals...</Text>
         </View>
     );
-
-
-    // const handlePress = async () => {
-    //     await AsyncStorage.setItem('lineId', lineId);
-    //     fetchStopPointsByCommonNameLineId(stopName, lineId)
-    //         .then(response => {
-    //             const stopPoint = response.data;
-    //             const lat = stopPoint.matches[0].lat;
-    //             const lon = stopPoint.matches[0].lon;
-
-    //             return fetchStopPointsByCoordinates(lat, lon);
-    //         })
-    //         .then(stopPointsResponse => {
-    //             const stopPoints: EntitiesStopPointInterface[] = stopPointsResponse.data.stopPoints;
-    //             const filteredStopPoints = stopPoints.filter(stopPoint =>
-    //                 stopPoint.commonName.toLowerCase().includes(stopName.toLowerCase()));
-
-    //             const stopPointNaptanIds = extractNaptanIdsDirections(filteredStopPoints).map(nd => ({
-    //                 label: nd.towards,
-    //                 value: nd.naptanId,
-    //             }));
-
-    //             setNaptanIds(stopPointNaptanIds);
-    //         })
-    //         .catch(error => console.log(error));
-    // }
-
-    // const handleSelect = async (stopId: string) => {
-
-    //     await AsyncStorage.setItem('stopId', stopId);
-    //     setSelectedNaptanId(stopId);
-    //     const fetchBusArrivalsForeground = async () => {
-    //         const busdata = await fetchBusArrivals();
-    //         console.log(`inside foreground ${busdata[0]}`);
-    //         setBusArrivals(busdata);
-    //     }
-
-    //     fetchBusArrivalsForeground();
-
-    //     setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
-    // }
 
     return (
         <View>
@@ -111,7 +59,10 @@ const BusArrivals: React.FC = () => {
 
             {debouncedLineId!="" && debouncedStopName!="" &&
             <StopPointsList lineId={debouncedLineId} 
-                            stopName={debouncedStopName}/>}
+                            stopName={debouncedStopName}
+                            setBusArrivals={setBusArrivals}
+                            timeInterval={timeInterval}
+                            />}
 
             {
                 busArrivals.length > 0 ?
