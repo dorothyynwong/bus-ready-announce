@@ -65,6 +65,7 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
         const intervalId = setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
 
         const setup = async () => {
+            console.log('Setting up background fetch');
             await registerBackgroundFetch();
         };
         setup();

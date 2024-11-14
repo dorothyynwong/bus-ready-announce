@@ -2,8 +2,8 @@ import {  Platform  } from "react-native";
 import * as Notifications from 'expo-notifications';
 import * as BackgroundFetch from 'expo-background-fetch';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const BACKGROUND_FETCH_TASK = 'background-fetch-bus-arrivals';
+import { BACKGROUND_FETCH_TASK } from "./backgroundFetchTask";
+import './backgroundFetchTask';
 
 const registerBackgroundFetch = async () => {
     try {
