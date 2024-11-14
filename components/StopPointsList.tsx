@@ -6,6 +6,7 @@ import { FlatList, View } from "react-native";
 import { Card, Text } from "react-native-paper";
 import { StyleSheet } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import registerBackgroundFetch from "@/tasks/registerBackgroundFetch";
 
 interface StopPointsListProps {
     lineId: string;
@@ -50,6 +51,9 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
         await AsyncStorage.setItem('lineId', lineId);
         await AsyncStorage.setItem('stopId', data.value);
         await AsyncStorage.setItem('timeInterval', timeInterval);
+        const currentTime = Date.now();
+        await AsyncStorage.setItem('fetchStartTime', currentTime.toString());
+
         const fetchBusArrivalsForeground = async () => {
             const busdata = await fetchBusArrivals();
             console.log(`inside foreground`);
@@ -58,7 +62,17 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
 
         fetchBusArrivalsForeground();
 
-        setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
+        const intervalId = setInterval(fetchBusArrivalsForeground, parseInt(timeInterval === "" ? "3" : timeInterval) * 60 * 1000);
+
+        const setup = async () => {
+            await registerBackgroundFetch();
+        };
+        setup();
+
+        setTimeout(() => {
+            clearInterval(intervalId);
+            console.log('Stopped fetching after 30 minutes');
+        }, 30 * 60 * 1000);
     }
     return (
         <View>

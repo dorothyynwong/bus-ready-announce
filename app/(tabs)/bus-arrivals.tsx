@@ -1,10 +1,6 @@
-import { fetchBusArrivals, fetchStopPointsByCommonNameLineId, fetchStopPointsByCoordinates } from "@/api/api";
-import { ArrivalPredictionsByLinesAndStopPointInterface, EntitiesStopPointInterface } from "@/api/apiInterface";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, TouchableOpacity, View } from "react-native";
-import * as BackgroundFetch from 'expo-background-fetch';
-import registerBackgroundFetch from "@/tasks/registerBackgroundFetch";
-import { BACKGROUND_FETCH_TASK } from "@/tasks/backgroundFetchTask";
+import { ArrivalPredictionsByLinesAndStopPointInterface} from "@/api/apiInterface";
+import React, { useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { TextInput, Text } from "react-native-paper";
 import useDebounce from "@/hooks/useDebounce";
 import StopPointsList from "@/components/StopPointsList";
@@ -19,17 +15,6 @@ const BusArrivals: React.FC = () => {
     const [timeStop, setTimeStop] = useState("30");
     const debouncedLineId = useDebounce(lineId, 10000);
     const debouncedStopName = useDebounce(stopName, 1000);
-
-    useEffect(() => {
-        const setup = async () => {
-            await registerBackgroundFetch();
-        };
-        setup();
-
-        return () => {
-            BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-        };
-    }, [busArrivals]);
 
     if (status === "loading") return (
         <View>

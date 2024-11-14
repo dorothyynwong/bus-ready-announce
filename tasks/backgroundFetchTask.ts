@@ -13,6 +13,14 @@ TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
     try {
         const batteryLevel = await Battery.getBatteryLevelAsync();
         const isCharging = await Battery.getBatteryStateAsync() === Battery.BatteryState.CHARGING;
+        const fetchStartTime = await AsyncStorage.getItem('fetchStartTime');
+        const currentTime = Date.now();
+
+        if (fetchStartTime && (currentTime - parseInt(fetchStartTime) > 10 * 60 * 1000)) { // 30 minutes
+            await BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
+            console.log('Background fetch task unregistered after 30 minutes');
+            return BackgroundFetch.BackgroundFetchResult.NoData;
+        }
 
         if (batteryLevel > 0.2 || isCharging) {
             const timeoutPromise = new Promise((_, reject) =>
