@@ -24,6 +24,7 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
     const [busStopData, setBusStopData] = useState<BusStopDataInterface[]>([]);
 
     useEffect(() => {
+        setBusStopData([]);
         fetchStopPointsByCommonNameLineId(stopName, lineId)
             .then(response => {
                 const stopPoint = response.data;
@@ -45,7 +46,7 @@ const StopPointsList: React.FC<StopPointsListProps> = ({ lineId, stopName, setBu
                 })
             })
             .catch(error => console.log(error));
-    }, [lineId, stopName]);
+    }, [lineId, stopName, timeInterval]);
 
     const onCardPress = async (data: BusStopDataInterface) => {
         await AsyncStorage.setItem('lineId', lineId);
